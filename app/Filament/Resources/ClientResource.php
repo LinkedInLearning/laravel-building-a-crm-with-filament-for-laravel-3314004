@@ -77,10 +77,15 @@ class ClientResource extends Resource
                                     ->columnSpanFull(),
                                 Forms\Components\TextInput::make('business_type')
                                     ->maxLength(255),
-                                Forms\Components\TextInput::make('company_size')
-                                    ->maxLength(6),
-                                Forms\Components\TextInput::make('temperature')
-                                    ->maxLength(6),
+                                
+                                Forms\Components\Select::make('company_size')->options([
+                                    'small', 'medium', 'big'
+                                ]),
+
+                                Forms\Components\Select::make('temperature')
+                                    ->options([
+                                        'cold', 'medium', 'hot'
+                                    ]),
                             ]),
                         ])->columnSpan(2),
 

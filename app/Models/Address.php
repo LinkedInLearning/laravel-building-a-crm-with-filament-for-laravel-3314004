@@ -9,6 +9,15 @@ class Address extends Model
 {
     use HasFactory;
 
+
+    public $fillable = [
+        'name',
+        'street',
+        'zip',
+        'city_id',
+        'client_id',
+    ];
+
     /**
      * Get the city that owns the address.
      */
