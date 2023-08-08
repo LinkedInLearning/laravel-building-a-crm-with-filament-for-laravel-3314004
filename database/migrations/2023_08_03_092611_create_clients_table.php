@@ -25,8 +25,8 @@ return new class extends Migration
             $table->string('company_website')->nullable();
             $table->text('business_details')->nullable();
             $table->string('business_type')->nullable();
-            $table->enum('company_size', ['small', 'mid', 'big'])->nullable();
-            $table->enum('temperature', ['cold', 'warm', 'hot'])->nullable();
+            $table->string('company_size', 5)->nullable();
+            $table->string('temperature', 5)->nullable();
             $table->text('referrals')->nullable();
             $table->string('photo')->nullable();
             $table->text('notes')->nullable();
