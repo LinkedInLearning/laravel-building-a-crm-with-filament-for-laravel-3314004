@@ -59,7 +59,9 @@ class ClientResource extends Resource
                                     ->columnSpanFull(),
 
                                 Forms\Components\Toggle::make('active')
-                                    ->required(),
+                                    ->required()
+//                                    ->visibleOn('edit'),
+                                    ->visible(fn($operation )=>  $operation === 'edit'),
                             ]),
 
                             Forms\Components\Section::make('Business info')->schema([
@@ -77,7 +79,7 @@ class ClientResource extends Resource
                                     ->columnSpanFull(),
                                 Forms\Components\TextInput::make('business_type')
                                     ->maxLength(255),
-                                
+
                                 Forms\Components\Select::make('company_size')->options([
                                     'small', 'medium', 'big'
                                 ]),
@@ -86,8 +88,12 @@ class ClientResource extends Resource
                                     ->options([
                                         'cold', 'medium', 'hot'
                                     ]),
-                            ]),
-                        ])->columnSpan(2),
+                            ])
+                                ->disabledOn('create')
+                            ,
+                        ])->columnSpan(2)
+
+                        ,
 
                         Forms\Components\Section::make()->schema([
                             Forms\Components\Textarea::make('notes')
@@ -137,7 +143,7 @@ class ClientResource extends Resource
                 Tables\Columns\TextColumn::make('photo')
                     ->searchable(),
                 Tables\Columns\IconColumn::make('active')
-                    ->boolean(),
+                    ->boolean()                ,
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
