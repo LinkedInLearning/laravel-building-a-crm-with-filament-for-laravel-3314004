@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\AddressResource\Pages;
 use App\Models\Address;
 use App\Models\Client;
+use App\Models\Country;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
@@ -43,6 +44,13 @@ class AddressResource extends Resource
                     TextInput::make('zip')
                         ->required()
                         ->maxLength(255),
+
+                    Select::make('country_id')
+                        ->label('Country')
+                        ->options(Country::all()->pluck('name', 'id'))
+                        ->required()
+                        ->searchable()
+                        ->preload(),
 
                     Select::make('city_id')
                         ->relationship('city', 'name')
