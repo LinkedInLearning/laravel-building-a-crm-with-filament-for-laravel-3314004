@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\AddressResource\Pages;
 use App\Models\Address;
+use App\Models\City;
 use App\Models\Client;
 use App\Models\Country;
 use Filament\Forms\Components\Fieldset;
@@ -17,6 +18,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Wizard;
 use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -48,12 +51,25 @@ class AddressResource extends Resource
                     Select::make('country_id')
                         ->label('Country')
                         ->options(Country::all()->pluck('name', 'id'))
+                        ->afterStateUpdated(function (?string $state, ?string $old, Set $set) {
+                           $set('city_id', null);
+                        })
                         ->required()
                         ->searchable()
-                        ->preload(),
+                        ->preload()
+                        ->live(),
 
                     Select::make('city_id')
-                        ->relationship('city', 'name')
+                        ->label('City')
+                        ->options(function (Get $get, Set $set) {
+                            if (!$get('country_id')){
+                                $cityCountryId = City::where('id', $get('city_id'))->first()->country_id;
+                                $set('country_id', $cityCountryId);
+                            }
+                                //if the country id is not null
+                                return City::where('country_id', $get('country_id'))->pluck('name', 'id')->all();
+                        })
+//                        ->relationship('city', 'name')
                         ->required()
                         ->searchable()
                         ->preload(),

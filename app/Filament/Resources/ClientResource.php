@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ClientResource\Pages;
 use App\Models\Client;
+use Carbon\Carbon;
 use Filament\Infolists\Components\Actions\Action;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -15,6 +16,7 @@ use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class ClientResource extends Resource
 {
@@ -116,7 +118,11 @@ class ClientResource extends Resource
 
                                 Forms\Components\FileUpload::make('photo')
                                     ->image()
-                                    ->maxSize(1024),
+                                    ->maxSize(1024)
+                                    ->getUploadedFileNameForStorageUsing(
+                                        function (TemporaryUploadedFile $file, Forms\Get $get) {
+                                            return (string) $get('first_name') . $get('last_name') . Carbon::now()->format('Ymd') . "." . $file->getClientOriginalExtension();
+                                        }),
 
                                 Forms\Components\TextInput::make('linkedin')
                                     ->maxLength(65535)
