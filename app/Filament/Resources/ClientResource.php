@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ClientResource\Pages;
 use App\Models\Client;
 use Carbon\Carbon;
+use Filament\Actions\DeleteAction;
 use Filament\Infolists\Components\Actions\Action;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -15,7 +16,10 @@ use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
+use Filament\Tables\Columns\Layout\Split;
+use Filament\Tables\Enums\ActionsPosition;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class ClientResource extends Resource
@@ -121,7 +125,7 @@ class ClientResource extends Resource
                                     ->maxSize(1024)
                                     ->getUploadedFileNameForStorageUsing(
                                         function (TemporaryUploadedFile $file, Forms\Get $get) {
-                                            return (string) $get('first_name') . $get('last_name') . Carbon::now()->format('Ymd') . "." . $file->getClientOriginalExtension();
+                                            return (string)$get('first_name') . $get('last_name') . Carbon::now()->format('Ymd') . "." . $file->getClientOriginalExtension();
                                         }),
 
                                 Forms\Components\TextInput::make('linkedin')
@@ -186,50 +190,48 @@ class ClientResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\ImageColumn::make('photo')->circular(),
                 Tables\Columns\TextColumn::make('first_name')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('last_name')
-                    ->searchable(),
+                    ->label('Name')
+                    ->formatStateUsing(fn(string $state, $record): string => $record->first_name . " " . $record->last_name)
+                    ->searchable(['first_name', 'last_name'])
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('email')
+                    ->visibleFrom('md')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('phone')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('mobile')
                     ->searchable(),
+
                 Tables\Columns\TextColumn::make('title')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('company')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('role')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('company_website')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('business_type')
-                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('company_size')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('temperature')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('photo')
-                    ->searchable(),
+
                 Tables\Columns\IconColumn::make('active')
                     ->boolean(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\Filter::make('active')
+                    ->query(function (Builder $query): Builder {
+                        return $query->where('active', true);
+                    })
+                    ->default()
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\ViewAction::make(),
-            ])
+                Tables\Actions\DeleteAction::make()->requiresConfirmation()
+            ], position: ActionsPosition::AfterCells)
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
@@ -237,6 +239,10 @@ class ClientResource extends Resource
             ])
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make(),
+            ])
+            ->contentGrid([
+                'md' => 1,
+                'xl' => 2,
             ]);
     }
 
