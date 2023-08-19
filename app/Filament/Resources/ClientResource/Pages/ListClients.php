@@ -16,4 +16,11 @@ class ListClients extends ListRecords
             Actions\CreateAction::make(),
         ];
     }
+
+    function getFooterWidgets(): array
+    {
+        return [
+            ClientResource\Widgets\RegisteredClientsChart::class
+        ];
+    }
 }

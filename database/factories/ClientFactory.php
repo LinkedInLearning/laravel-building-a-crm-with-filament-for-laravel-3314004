@@ -35,6 +35,7 @@ class ClientFactory extends Factory
             'active' => fake()->boolean,
             'notes' => fake()->text,
             'photo' => fake()->imageUrl(200, 200, 'people', true),
+            'created_at' =>fake()->dateTimeThisYear
         ];
     }
 }
