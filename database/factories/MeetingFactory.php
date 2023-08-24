@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Client;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,9 +18,12 @@ class MeetingFactory extends Factory
      */
     public function definition(): array
     {
+        $start = fake()->dateTimeBetween('now', '+30 days');
+        $end = Carbon::createFromDate($start);
+
         return [
-            'start' => fake()->dateTimeBetween('now', '+30 days'),
-            'end' => fake()->dateTimeBetween('+30 days', '+60 days'),
+            'start' => $start,
+            'end' => $end->addHours(fake()->numberBetween(1, 3)),
             'summary' => fake()->sentence,
             'title' => fake()->word,
             'client_id' => function () {
