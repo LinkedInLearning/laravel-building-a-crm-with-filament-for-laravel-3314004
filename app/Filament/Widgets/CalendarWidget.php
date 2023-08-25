@@ -2,14 +2,20 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\Client;
 use App\Models\Meeting;
-use Filament\Widgets\Widget;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\DB;
 use Saade\FilamentFullCalendar\Widgets\FullCalendarWidget;
 
 class CalendarWidget extends FullCalendarWidget
 {
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
 
     /**
@@ -27,8 +33,48 @@ class CalendarWidget extends FullCalendarWidget
     public function fetchEvents(array $fetchInfo): array
     {
         // You can use $fetchInfo to filter events by date.
-        return Meeting::whereBetween('start',[$fetchInfo['start'],$fetchInfo['end']])
+        return Meeting::whereBetween('start', [$fetchInfo['start'], $fetchInfo['end']])
             ->get()
             ->toArray();
     }
+
+    public static function getCreateEventFormSchema(): array
+    {
+        return [
+            TextInput::make('title')->required(),
+
+            Select::make('client_id')
+                ->options(Client::select(DB::raw('CONCAT(first_name, " ", last_name, " - ", company) as name, id'))->get()->pluck('name', 'id')->toArray())
+                ->label('Client')
+                ->searchable(),
+
+            Textarea::make('summary'),
+
+            DateTimePicker::make('start')
+                ->required(),
+
+            DateTimePicker::make('end')
+                ->after('start')
+                ->required()
+        ];
+    }
+
+    public function createEvent(array $data): void
+    {
+        Meeting::create($data);
+
+        $this->refreshEvents();
+
+        Notification::make()
+            ->title('Meeting saved successfully')
+            ->success()
+            ->send();
+    }
+
+    public static function canCreate(): bool
+    {
+        // Returning 'false' will remove the 'Create' button on the calendar.
+        return true;
+    }
+
 }
