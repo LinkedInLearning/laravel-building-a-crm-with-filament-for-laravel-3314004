@@ -77,4 +77,63 @@ class CalendarWidget extends FullCalendarWidget
         return true;
     }
 
+    public static function getEditEventFormSchema(): array
+    {
+        return [
+            TextInput::make('title')->required(),
+
+            Select::make('client_id')
+                ->options(Client::select(DB::raw('CONCAT(first_name, " ", last_name, " - ", company) as name, id'))->get()->pluck('name', 'id')->toArray())
+                ->label('Client')
+                ->searchable(),
+
+            Textarea::make('summary'),
+
+            DateTimePicker::make('start')
+                ->required(),
+
+            DateTimePicker::make('end')
+                ->after('start')
+                ->required()
+        ];
+
+    }
+
+    public function onEventClick($event): void
+    {
+        parent::onEventClick($event);
+
+        $this->editEventFormState['client_id'] = $this->editEventFormState['extendedProps']['client_id'];
+        $this->editEventFormState['summary'] = $this->editEventFormState['extendedProps']['summary'];
+    }
+
+
+    public function editEvent(array $data): void
+    {
+
+        if(Meeting::find($this->event_id)->update($data)){
+            Notification::make()
+                ->title('Meeting edited successfully')
+                ->success()
+                ->send();
+        }
+
+        $this->refreshEvents();
+    }
+
+    protected $listeners = [
+        'deleteEvent' => 'onDeleteEvent'
+    ];
+
+    public function onDeleteEvent()
+    {
+        if(Meeting::destroy($this->event_id)){
+            Notification::make()
+                ->title('Meeting delete successfully')
+                ->success()
+                ->send();
+        }
+
+        $this->refreshEvents();
+    }
 }
